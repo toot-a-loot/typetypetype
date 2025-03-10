@@ -7,5 +7,6 @@ public class Main
         MainMenu mainMenu = new MainMenu();
         Play play = new Play();
         MainFrame mainFrame = new MainFrame(mainMenu);
+        
     }
 } 
