@@ -6,7 +6,7 @@ public class Main
         //  TODO : make fonts to pixelated elegence regular
         MainMenu mainMenu = new MainMenu();
         Play play = new Play();
-        MainFrame mainFrame = new MainFrame(mainMenu);
+        MainFrame mainFrame = new MainFrame(play);
         
     }
 } 

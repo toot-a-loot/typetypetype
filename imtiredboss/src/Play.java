@@ -4,13 +4,15 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
+import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
 public class Play extends JPanel
 {
-    private JPanel actualPlayArea;
+    private JPanel backPanel;
     private BufferedImage player;
     private JPanel ground;
+    private JLayeredPane layerMyPanels;
 
     public Play()
     {
@@ -21,19 +23,43 @@ public class Play extends JPanel
     private void setupBackground()
     {
         this.setBounds(0,0,720,960);
-        this.setBackground(Color.BLACK);
         this.setLayout(null);
         
-        actualPlayArea = new JPanel();
-        actualPlayArea.setBounds(0,0,720,960);
-        actualPlayArea.setBackground(Color.lightGray);
+        backPanel = new StackedSineWaveBackground(720, 960);
+        backPanel.setBounds(0,0,720,960);
 
-        ground = new JPanel();
-        ground.setBounds(0,860,720,100);
-        ground.setBackground(Color.DARK_GRAY);
+        ground = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.setColor(Color.black);
+                g.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+        ground.setBounds(0, 860, 720, 100);
+        
+        // Create a panel for the player
+        JPanel playerPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (player != null) {
+                    g.drawImage(player.getSubimage(0, 0, 62, 62), 340, 764, null);
+                }
+            }
+        };
+        playerPanel.setBounds(0, 0, 720, 960);
+        playerPanel.setOpaque(false);
+        
+        layerMyPanels = new JLayeredPane();
+        layerMyPanels.setBounds(0, 0, 720, 960);
+        layerMyPanels.setLayout(null);
 
-        this.add(ground);
-        this.add(actualPlayArea);
+        layerMyPanels.add(backPanel, JLayeredPane.DEFAULT_LAYER);
+        layerMyPanels.add(ground, JLayeredPane.PALETTE_LAYER);
+        layerMyPanels.add(playerPanel, JLayeredPane.DRAG_LAYER);
+
+        add(layerMyPanels);
         this.setVisible(true);
     }
 
@@ -51,10 +77,10 @@ public class Play extends JPanel
 
     }
 
-    public void paintComponent(Graphics g)
-    {
-        super.paintComponent(g);    
+    // public void paintComponent(Graphics g)
+    // {
+    //     super.paintComponent(g);    
 
-        g.drawImage(player.getSubimage(0, 0, 96, 96), 0, 0, null);
-    }
+    //     g.drawImage(player.getSubimage(0, 0, 96, 96), 0, 0, null);
+    // }
 }
