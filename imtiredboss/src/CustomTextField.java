@@ -13,6 +13,7 @@ public class CustomTextField extends JTextField {
 
     public CustomTextField(String placeholder) {
         this.placeholder = placeholder;
+        setCaret(new HorizontalCaret()); // Set the custom horizontal caret
         addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -62,10 +63,8 @@ public class CustomTextField extends JTextField {
         }
     }
 
-    
     @Override
-    protected void processKeyEvent(KeyEvent e) 
-    {
+    protected void processKeyEvent(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE || e.getKeyCode() == KeyEvent.VK_DELETE) {
             if (getText().isEmpty()) {
                 e.consume();

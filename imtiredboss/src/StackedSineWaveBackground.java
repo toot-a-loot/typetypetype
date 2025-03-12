@@ -9,31 +9,23 @@ import java.awt.geom.Rectangle2D;
 public class StackedSineWaveBackground extends JPanel implements KeyListener {
     private int WIDTH; // Width of the panel
     private int HEIGHT; // Height of the panel
-    private static final int NUM_WAVES = 4; // Number of stacked sine waves
-    private static final int SPEED = 500; // Speed of the animation (pixels per frame)
-    private int WAVE_HEIGHT; // Height of each wave
-    private static final int STROKE_SIZE = 150; // Large stroke size for thick sine waves (in pixels)
+    private static final int NUM_WAVES = 5; // Number of stacked sine waves
+    private static final int SPEED = 150; // Speed of the animation (pixels per frame)
+    private int WAVE_HEIGHT;
+    private static final int STROKE_SIZE = 100; 
+    private static final int PIXEL_SIZE = 4;
+    private double phase; 
     
-    // Pixelization settings
-    private static final int PIXEL_SIZE = 4; // Size of each "pixel" square
+    private Color waveColor = new Color(80, 80, 80);
     
-    private double phase; // Phase for the sine waves (uniform for all waves)
-    
-    // Base wave color (RGB)
-    private Color waveColor = new Color(80, 80, 80); // Default blue color
-    
-    // Pulse colors (what the wave and background will pulse towards)
     private Color wavePulseColor = new Color(100, 100, 100);
     private Color backgroundPulseColor = new Color(60, 60, 60); 
     
-    // Background color
     private Color backgroundColor = new Color(40, 40, 40); 
     
-    // Pulse intensity (0.0 to 1.0, where 1.0 is full pulse)
     private float pulseIntensity = 0.0f;
     
-    // Pulse decay factor (higher = faster pulse)
-    private float pulseDecayFactor = 0.85f; // Faster decay for quicker pulse effect
+    private float pulseDecayFactor = 0.85f; 
     
     public StackedSineWaveBackground(int width, int height) {
         phase = 0;

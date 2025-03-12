@@ -25,6 +25,7 @@ import javax.swing.text.DocumentFilter;
 
 public class MainMenu extends JPanel 
 {
+    private Font pixelatedEleganceFont;
     private JPanel actualMainMenu;
     private JPanel topArea;
     private JPanel start;
@@ -42,11 +43,13 @@ public class MainMenu extends JPanel
     private RoundedPanel helpPanel;
 
     public MainMenu() {
+        loadCustomFont();
         setDoubleBuffered(true); // Enable double buffering
         setupHelpAndSettingsPanel();
         setupTopElements();
         setupBackground();
         setupStartPanel();
+        
         
         layerMyPanels = new JLayeredPane();
         layerMyPanels.setBounds(0, 0, 720, 960);
@@ -135,21 +138,21 @@ public class MainMenu extends JPanel
         start.setLayout(new GridBagLayout());
         
         typeToStartText = new JLabel("Type");
-        typeToStartText.setFont(new Font("Pixelated Elegance", Font.PLAIN, 14));
+        typeToStartText.setFont(pixelatedEleganceFont.deriveFont(Font.PLAIN, 14));
         typeToStartText.setForeground(Color.gray);
         typeToStartText.setHorizontalAlignment(SwingConstants.CENTER);
         
         inputField = new CustomTextField("START");
         inputField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-        inputField.setColumns(10);
+        inputField.setColumns(5);
         inputField.setBackground(new Color(0, 0, 0, 0)); 
         inputField.setForeground(Color.WHITE);
-        inputField.setFont(new Font("Pixelated Elegance", Font.ITALIC, 24));
-        inputField.setHorizontalAlignment(JTextField.CENTER);
+        inputField.setFont(pixelatedEleganceFont.deriveFont(Font.ITALIC, 24));
+        inputField.setHorizontalAlignment(JTextField.LEFT);
         inputField.setOpaque(false);
 
         toBeginText = new JLabel("to begin!");
-        toBeginText.setFont(new Font("Pixelated Elegance", Font.PLAIN, 14));
+        toBeginText.setFont(pixelatedEleganceFont.deriveFont(Font.PLAIN, 14));
         toBeginText.setForeground(Color.gray);
         toBeginText.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -315,4 +318,18 @@ public class MainMenu extends JPanel
         helpIcon.setEnabled(!disable);
     }
 
+    private void loadCustomFont() {
+        try {
+            InputStream is = getClass().getResourceAsStream("/font/PixelatedElegance.ttf");
+            if (is == null) {
+                throw new RuntimeException("Font file not found: /fonts/PixelatedElegance.ttf");
+            }
+    
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT, is);
+            pixelatedEleganceFont = customFont.deriveFont(Font.PLAIN, 14); // Adjust size and style
+        } catch (Exception e) {
+            e.printStackTrace();
+            pixelatedEleganceFont = new Font("SansSerif", Font.PLAIN, 14); // Fallback font
+        }
+    }
 }

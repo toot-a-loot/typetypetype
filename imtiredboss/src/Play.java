@@ -13,6 +13,7 @@ public class Play extends JPanel
     private BufferedImage player;
     private JPanel ground;
     private JLayeredPane layerMyPanels;
+    private CustomTextField typeHere;
 
     public Play()
     {
@@ -28,11 +29,13 @@ public class Play extends JPanel
         backPanel = new StackedSineWaveBackground(720, 960);
         backPanel.setBounds(0,0,720,960);
 
+        typeHere = new CustomTextField();
+
         ground = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                g.setColor(Color.black);
+                g.setColor(new Color(30,30,30));
                 g.fillRect(0, 0, getWidth(), getHeight());
             }
         };
@@ -44,7 +47,7 @@ public class Play extends JPanel
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 if (player != null) {
-                    g.drawImage(player.getSubimage(0, 0, 62, 62), 340, 764, null);
+                    g.drawImage(player.getSubimage(0, 0, 62, 62), 330, 800, null);
                 }
             }
         };
@@ -76,11 +79,4 @@ public class Play extends JPanel
         }
 
     }
-
-    // public void paintComponent(Graphics g)
-    // {
-    //     super.paintComponent(g);    
-
-    //     g.drawImage(player.getSubimage(0, 0, 96, 96), 0, 0, null);
-    // }
 }
