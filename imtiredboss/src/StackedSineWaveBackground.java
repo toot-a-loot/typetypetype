@@ -2,15 +2,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.geom.Rectangle2D;
 
-public class StackedSineWaveBackground extends JPanel implements KeyListener {
+public class StackedSineWaveBackground extends JPanel {
     private int WIDTH; // Width of the panel
     private int HEIGHT; // Height of the panel
     private static final int NUM_WAVES = 5; // Number of stacked sine waves
-    private static final int SPEED = 150; // Speed of the animation (pixels per frame)
+    private static final int SPEED = 100; // Speed of the animation (pixels per frame)
     private int WAVE_HEIGHT;
     private static final int STROKE_SIZE = 100; 
     private static final int PIXEL_SIZE = 4;
@@ -42,10 +40,6 @@ public class StackedSineWaveBackground extends JPanel implements KeyListener {
             }
         });
         timer.start(); // Start the animation
-
-        // Add key listener for user input
-        setFocusable(true);
-        addKeyListener(this);
     }
 
     @Override
@@ -122,23 +116,15 @@ public class StackedSineWaveBackground extends JPanel implements KeyListener {
         pulseIntensity = Math.max(0.0f, pulseIntensity * pulseDecayFactor);
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // Trigger the pulse effect when the user types
-        pulseIntensity = 1.0f;
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {}
-
-    @Override
-    public void keyReleased(KeyEvent e) {}
-
     // Method to set the wave and pulse colors
     public void setColors(Color waveColor, Color wavePulseColor, Color backgroundColor, Color backgroundPulseColor) {
         this.waveColor = waveColor;
         this.wavePulseColor = wavePulseColor;
         this.backgroundColor = backgroundColor;
         this.backgroundPulseColor = backgroundPulseColor;
+    }
+
+    public void triggerPulse() {
+        pulseIntensity = 1.0f; // Reset the pulse intensity to trigger the animation
     }
 }

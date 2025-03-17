@@ -143,12 +143,13 @@ public class MainMenu extends JPanel
         typeToStartText.setHorizontalAlignment(SwingConstants.CENTER);
         
         inputField = new CustomTextField("START");
+        inputField.setPreferredSize(new Dimension(70,50));
         inputField.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
         inputField.setColumns(5);
         inputField.setBackground(new Color(0, 0, 0, 0)); 
         inputField.setForeground(Color.WHITE);
-        inputField.setFont(pixelatedEleganceFont.deriveFont(Font.ITALIC, 24));
-        inputField.setHorizontalAlignment(JTextField.LEFT);
+        inputField.setFont(pixelatedEleganceFont.deriveFont(Font.BOLD, 32));
+        inputField.setHorizontalAlignment(JTextField.CENTER);
         inputField.setOpaque(false);
 
         toBeginText = new JLabel("to begin!");

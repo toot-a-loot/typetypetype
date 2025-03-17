@@ -1,12 +1,12 @@
-public class Main
-{
-    public static void main(String[] args) 
-    {   
-        // LoadingScreen loadingScreen = new LoadingScreen();
-        //  TODO : make fonts to pixelated elegence regular
+public class Main {
+    public static void main(String[] args) {
         MainMenu mainMenu = new MainMenu();
         Play play = new Play();
-        MainFrame mainFrame = new MainFrame(mainMenu);
-        
+        MainFrame mainFrame = new MainFrame(play);
+
+        WordGenerator wordGenerator = new WordGenerator("words.txt");
+        WordThread wordThread = new WordThread(play, 5, wordGenerator);
+        play.setWordThread(wordThread); 
+        wordThread.start();
     }
-} 
+}
