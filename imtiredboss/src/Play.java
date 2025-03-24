@@ -25,7 +25,10 @@ public class Play extends JPanel {
     private PlayTextField typeHere;
     private List<JLabel> wordLabels; // List of active word labels
     private List<String> activeWords; // Track active words
-    private WordThread wordThread; // Reference to the WordThread
+    private WordThread wordThread;
+    private int currentSpriteFrame = 0; // Track current sprite frame
+    private final int SPRITE_WIDTH = 62;
+    private final int SPRITE_HEIGHT = 62;
 
     public Play() {
         wordLabels = new ArrayList<>();
@@ -77,6 +80,7 @@ public class Play extends JPanel {
                 }
             }
         });
+        
 
         // Apply document filter to limit input to 20 characters and enforce uppercase
         ((AbstractDocument) typeHere.getDocument()).setDocumentFilter(new DocumentFilter() {
@@ -116,7 +120,11 @@ public class Play extends JPanel {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 if (player != null) {
-                    g.drawImage(player.getSubimage(0, 0, 62, 62), 327, 800, null);
+                    int srcX = currentSpriteFrame * SPRITE_WIDTH;
+                    // Ensure we don't go out of bounds
+                    srcX = Math.min(srcX, player.getWidth() - SPRITE_WIDTH);
+                    g.drawImage(player.getSubimage(srcX, 0, SPRITE_WIDTH, SPRITE_HEIGHT), 
+                                327, 800, null);
                 }
             }
         };
@@ -135,7 +143,21 @@ public class Play extends JPanel {
         layerMyPanels.add(typeHere, JLayeredPane.MODAL_LAYER);
 
         add(layerMyPanels);
+
         this.setVisible(true);
+        typeHere.setOnTypeCallback(() -> {
+            // Randomly select between frame 1 or 2 (skipping frame 0)
+            currentSpriteFrame = (int)(Math.random() * 2) + 1;
+            playerPanel.repaint();
+            
+            // Reset to default frame after a short delay
+            Timer timer = new Timer(300, evt -> {
+                currentSpriteFrame = 0;
+                playerPanel.repaint();
+            });
+            timer.setRepeats(false);
+            timer.start();
+        });
     }
 
     private void setupPlayer() {
@@ -187,12 +209,33 @@ public class Play extends JPanel {
         this.wordThread = wordThread;
     }
 
-    public void showGameOverMessage() {
-        JLabel gameOverLabel = new JLabel("Game Over!");
+    public PlayTextField getTypeHereField() {
+        return typeHere;
+    }
+
+    public void showGameOverMessage() 
+    {
+        JLabel gameOverContainer = new JLabel();
+        gameOverContainer.setLayout(null);
+        gameOverContainer.setBounds(120,200,500,600);
+
+        JLabel gameOverLabel = new JLabel("Game Over :(");
         gameOverLabel.setFont(pixelatedEleganceFont.deriveFont(Font.BOLD, 48));
         gameOverLabel.setForeground(Color.RED);
-        gameOverLabel.setBounds(200, 400, 400, 100);
-        layerMyPanels.add(gameOverLabel, JLayeredPane.MODAL_LAYER);
+        gameOverLabel.setBounds(0, 0, 500, 100);
+        gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        
+        JLabel restartQuestionMark = new JLabel("<html><div style='text-align: center; width : 373px;'>Type<br><br>RESTART<br>MAIN MENU<br>or<br>EXIT</div></html>");
+        restartQuestionMark.setFont(pixelatedEleganceFont.deriveFont(Font.BOLD, 24));
+        restartQuestionMark.setForeground(Color.gray);
+        gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        restartQuestionMark.setBounds(0, 70, 500, 300);
+
+        gameOverContainer.add(gameOverLabel);
+        gameOverContainer.add(restartQuestionMark);
+
+        layerMyPanels.add(gameOverContainer, JLayeredPane.MODAL_LAYER);
         layerMyPanels.revalidate();
         layerMyPanels.repaint();
     }

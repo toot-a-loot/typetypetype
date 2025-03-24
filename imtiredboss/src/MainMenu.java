@@ -13,11 +13,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -183,17 +185,36 @@ public class MainMenu extends JPanel
         inputField.addActionListener((ActionEvent e) -> {
             String input = inputField.getText().trim().toLowerCase();
             if (input.equals("start")) {
-                // TODO : make game actually start when user enters start
-            } else if (input.equals("exit"))
-            {
-                // TODO : make popup first before system exit!
+                // Get the parent window
+                java.awt.Window window = SwingUtilities.getWindowAncestor(MainMenu.this);
+                if (window != null) {
+                    // Create new Play panel
+                    Play play = new Play();
+                    
+                    // Start the word thread
+                    WordGenerator wordGenerator = new WordGenerator("words.txt");
+                    WordThread wordThread = new WordThread(play, 5, wordGenerator);
+                    play.setWordThread(wordThread); 
+                    wordThread.start();
+                    
+                    // Replace the content
+                    ((JFrame) window).getContentPane().removeAll();
+                    window.add(play);
+                    window.revalidate();
+                    window.repaint();
+                    
+                    // Request focus on the PlayTextField after the panel is visible
+                    SwingUtilities.invokeLater(() -> {
+                        play.getTypeHereField().requestFocusInWindow();
+                    });
+                }
+            } else if (input.equals("exit")) {
                 System.exit(0);
-            }
-            else {
+            } else {
                 inputField.setText("");
             }
         });
-        
+            
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         gbc.fill = GridBagConstraints.HORIZONTAL;

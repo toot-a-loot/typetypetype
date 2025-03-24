@@ -35,7 +35,7 @@ public class WordThread extends Thread {
             }
 
             // Generate a random delay between 500ms and 1500ms
-            int randomDelay = random.nextInt(1001) + 200; // Random number between 500 and 1500 (inclusive)
+            int randomDelay = random.nextInt(1001) + 400; // Random number between 500 and 1500 (inclusive)
             try {
                 Thread.sleep(randomDelay); // Use the random delay
             } catch (InterruptedException e) {
@@ -82,7 +82,7 @@ public class WordThread extends Thread {
         play.addWordLabel(wordLabel);
 
         new Thread(() -> {
-            while (wordLabel.getY() < 860 && !stopGeneration) { // Stop animation if stopGeneration is true
+            while (wordLabel.getY() < 840 && !stopGeneration) { // Stop animation if stopGeneration is true
                 // Check if the word label is still in the container
                 if (play.containsWordLabel(wordLabel)) {
                     wordLabel.setLocation(wordLabel.getX(), wordLabel.getY() + 1);
@@ -98,7 +98,7 @@ public class WordThread extends Thread {
             }
 
             // Only stop the game if the word reaches the bottom (y-position 860)
-            if (wordLabel.getY() >= 860 && play.containsWordLabel(wordLabel)) {
+            if (wordLabel.getY() >= 840 && play.containsWordLabel(wordLabel)) {
                 stopGeneration = true; // Stop generating new words
                 play.showGameOverMessage(); // Show the "Game Over" message
             }

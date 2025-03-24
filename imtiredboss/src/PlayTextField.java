@@ -1,21 +1,29 @@
 import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javax.swing.*;
 
 public class PlayTextField extends JTextField {
-    private StackedSineWaveBackground background; // Reference to the background
+    private StackedSineWaveBackground background;
+    private Runnable onTypeCallback;
 
     public PlayTextField(StackedSineWaveBackground background) {
-        this.background = background; // Set the background reference
-        setupKeyListener(); // Add key listener to trigger animation
+        this.background = background;
+        setupKeyListener();
+    }
+
+    public void setOnTypeCallback(Runnable callback) {
+        this.onTypeCallback = callback;
     }
 
     private void setupKeyListener() {
-        // Add a key listener to trigger the background animation when typing
         addKeyListener(new KeyAdapter() {
             @Override
-            public void keyTyped(java.awt.event.KeyEvent e) {
-                if (isFocusOwner()) { // Only trigger if the PlayTextField has focus
-                    background.triggerPulse(); // Trigger the background animation
+            public void keyTyped(KeyEvent e) {
+                if (isFocusOwner()) {
+                    background.triggerPulse();
+                    if (onTypeCallback != null) {
+                        onTypeCallback.run();
+                    }
                 }
             }
         });

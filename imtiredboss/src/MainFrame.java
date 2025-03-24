@@ -1,21 +1,25 @@
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class MainFrame 
-{
-    private JFrame mainFrame;
-
-    public MainFrame(JPanel currentState)
+public class MainFrame extends JFrame
+ {  
+    public MainFrame(JPanel initialPanel) 
     {
-        mainFrame = new JFrame();
-        mainFrame.setSize(720,960);
-        mainFrame.setUndecorated(true);
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainFrame.setLocationRelativeTo(null);
-        mainFrame.setLayout(null);
+        setSize(720, 960);
+        setUndecorated(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(null);
 
-        mainFrame.add(currentState);
-        mainFrame.setVisible(true);
+        add(initialPanel);
+        setVisible(true);
+    }
+
+    public void switchPanel(JPanel newPanel) 
+    {
+        getContentPane().removeAll();
+        add(newPanel);
+        revalidate();
+        repaint();
     }
 }
