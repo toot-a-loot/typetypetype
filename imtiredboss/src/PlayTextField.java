@@ -9,7 +9,7 @@ public class PlayTextField extends JTextField {
     private StackedSineWaveBackground background;
     private Runnable onTypeCallback;
     private Clip audioClip;
-    private float volume = 0.2f; 
+    private float volume = 0.7f;
     
     public PlayTextField(StackedSineWaveBackground background) {
         this.background = background;

@@ -32,7 +32,7 @@ public class MainMenu extends JPanel
     private RoundedPanel settingsPanel;
     private RoundedPanel helpPanel;
     private MusicPlayer musicPlayer; 
-    private String backgroundMusicPath = "/music/main menu bgm (undertale ost no. 20).wav"; 
+    private String backgroundMusicPath = "music/main menu bgm (undertale ost no. 20).wav"; 
 
     public MainMenu() {
         loadCustomFont();
@@ -61,7 +61,7 @@ public class MainMenu extends JPanel
     private void initializeMusic() {
         musicPlayer = new MusicPlayer();
         musicPlayer.play(backgroundMusicPath, true);
-        musicPlayer.setVolume(0.7f);
+        musicPlayer.setVolume(1.0f);
     }
     
     public void stopMusic() {
@@ -153,7 +153,7 @@ public class MainMenu extends JPanel
                 {
                     Play play = new Play();
                     
-                    WordGenerator wordGenerator = new WordGenerator("words.txt");
+                    WordGenerator wordGenerator = new WordGenerator("src/words.txt");
                     WordThread wordThread = new WordThread(play, 5, wordGenerator);
                     play.setWordThread(wordThread); 
                     wordThread.start();

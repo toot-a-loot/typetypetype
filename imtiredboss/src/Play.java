@@ -1,6 +1,4 @@
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -49,7 +47,7 @@ public class Play extends JPanel {
         musicPlayer = new MusicPlayer();
         
         musicPlayer.play(gameplayMusicPath, true); 
-        musicPlayer.setVolume(0.65f);
+        musicPlayer.setVolume(0.8f);
     }
 
     private void setupBackground() {
@@ -266,15 +264,25 @@ public class Play extends JPanel {
         gameOverLabel.setForeground(Color.RED);
         gameOverLabel.setBounds(0, 0, 500, 100);
         gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        
-        JLabel restartQuestionMark = new JLabel("<html><div style='text-align: center; width : 373px;'>Type<br><br>RESTART<br>MAIN MENU<br>or<br>EXIT</div></html>");
-        restartQuestionMark.setFont(pixelatedEleganceFont.deriveFont(Font.BOLD, 24));
-        restartQuestionMark.setForeground(Color.gray);
-        gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        restartQuestionMark.setBounds(0, 70, 500, 300);
+
+        JPanel messagePanel = new JPanel();
+        messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
+        messagePanel.setOpaque(false); // if you want transparent background
+
+        String[] lines = { "Type", "", "RESTART", "MAIN MENU", "or", "EXIT" };
+        for (String line : lines)
+        {
+            JLabel label = new JLabel(line);
+            label.setFont(pixelatedEleganceFont.deriveFont(Font.BOLD, 24f));
+            label.setForeground(Color.GRAY);
+            label.setAlignmentX(Component.CENTER_ALIGNMENT);
+            messagePanel.add(label);
+        }
+
+        messagePanel.setBounds(0, 70, 500, 300);
 
         gameOverContainer.add(gameOverLabel);
-        gameOverContainer.add(restartQuestionMark);
+        gameOverContainer.add(messagePanel);
 
         layerMyPanels.add(gameOverContainer, JLayeredPane.MODAL_LAYER);
         layerMyPanels.revalidate();

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="imtiredboss">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/imtiredboss.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
