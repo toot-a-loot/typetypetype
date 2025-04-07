@@ -1,17 +1,11 @@
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.io.InputStream;
-import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -31,27 +25,22 @@ public class MainMenu extends JPanel
     private JPanel actualMainMenu;
     private JPanel topArea;
     private JPanel start;
-    private BufferedImage settingsImageNormal;
-    private BufferedImage settingsImageHover;
-    private BufferedImage helpImageNormal;
-    private BufferedImage helpImageHover;
-    private SettingsIcon settingsIcon;
-    private HelpIcon helpIcon;
     private JLabel typeToStartText;
-    private JTextField inputField;
+    private CustomTextField inputField;
     private JLabel toBeginText;
     private JLayeredPane layerMyPanels;
     private RoundedPanel settingsPanel;
     private RoundedPanel helpPanel;
+    private MusicPlayer musicPlayer; 
+    private String backgroundMusicPath = "/music/main menu bgm (undertale ost no. 20).wav"; 
 
     public MainMenu() {
         loadCustomFont();
-        setDoubleBuffered(true); // Enable double buffering
+        setDoubleBuffered(true); 
         setupHelpAndSettingsPanel();
-        setupTopElements();
         setupBackground();
         setupStartPanel();
-        
+        initializeMusic(); 
         
         layerMyPanels = new JLayeredPane();
         layerMyPanels.setBounds(0, 0, 720, 960);
@@ -61,15 +50,32 @@ public class MainMenu extends JPanel
         layerMyPanels.add(settingsPanel, JLayeredPane.PALETTE_LAYER);
         layerMyPanels.add(helpPanel, JLayeredPane.PALETTE_LAYER);
 
-        topArea.add(settingsIcon);
-        topArea.add(helpIcon);
         actualMainMenu.add(topArea);
         actualMainMenu.add(start);
 
         add(layerMyPanels);
-
         
         setVisible(true);
+    }
+
+    private void initializeMusic() {
+        musicPlayer = new MusicPlayer();
+        musicPlayer.play(backgroundMusicPath, true);
+        musicPlayer.setVolume(0.7f);
+    }
+    
+    public void stopMusic() {
+        if (musicPlayer != null) {
+            musicPlayer.stop();
+        }
+    }
+
+    public void setBackgroundMusicPath(String path) {
+        this.backgroundMusicPath = path;
+        if (musicPlayer != null && musicPlayer.isPlaying()) {
+            musicPlayer.stop();
+            musicPlayer.play(backgroundMusicPath, true);
+        }
     }
 
     private void setupBackground() {
@@ -86,51 +92,6 @@ public class MainMenu extends JPanel
         topArea.setBounds(0, 0, 720, 100);
         topArea.setBackground(Color.black);
         topArea.setLayout(null);
-
-        helpIcon = new HelpIcon();
-        helpIcon.setBounds(630, 20, 32, 32); 
-        
-        helpIcon.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                helpIcon.setHovered(true);
-                helpIcon.repaint();
-            }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                helpIcon.setHovered(false);
-                helpIcon.repaint();
-            }
-            
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                // TODO : make help
-                showHelpPanel();
-            }
-        });
-
-        settingsIcon = new SettingsIcon();
-        settingsIcon.setBounds(670, 20, 32, 32); 
-        
-        settingsIcon.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                settingsIcon.setHovered(true);
-                settingsIcon.repaint();
-            }
-            
-            @Override
-            public void mouseExited(MouseEvent e) {
-                settingsIcon.setHovered(false);
-                settingsIcon.repaint();
-            }
-            
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                showSettingsPanel();
-            }
-        });
     }
 
     private void setupStartPanel() {
@@ -185,25 +146,23 @@ public class MainMenu extends JPanel
         inputField.addActionListener((ActionEvent e) -> {
             String input = inputField.getText().trim().toLowerCase();
             if (input.equals("start")) {
-                // Get the parent window
+                stopMusic(); // Stop music before transitioning
+                
                 java.awt.Window window = SwingUtilities.getWindowAncestor(MainMenu.this);
-                if (window != null) {
-                    // Create new Play panel
+                if (window != null) 
+                {
                     Play play = new Play();
                     
-                    // Start the word thread
                     WordGenerator wordGenerator = new WordGenerator("words.txt");
                     WordThread wordThread = new WordThread(play, 5, wordGenerator);
                     play.setWordThread(wordThread); 
                     wordThread.start();
                     
-                    // Replace the content
                     ((JFrame) window).getContentPane().removeAll();
                     window.add(play);
                     window.revalidate();
                     window.repaint();
                     
-                    // Request focus on the PlayTextField after the panel is visible
                     SwingUtilities.invokeLater(() -> {
                         play.getTypeHereField().requestFocusInWindow();
                     });
@@ -225,8 +184,10 @@ public class MainMenu extends JPanel
         start.add(toBeginText, gbc);
     }
     
-    private void setupHelpAndSettingsPanel()
-    {
+    // Rest of the MainMenu class code...
+    // (unchanged methods omitted for brevity)
+    
+    private void setupHelpAndSettingsPanel() {
         helpPanel = new RoundedPanel(30);
         helpPanel.setBounds(85, 180, 550, 600);
         helpPanel.setBackground(Color.black);
@@ -238,88 +199,6 @@ public class MainMenu extends JPanel
         settingsPanel.setBackground(Color.black);
         settingsPanel.setForeground(Color.white); // Border color
         settingsPanel.setVisible(false);
-    }
-
-    private void setupTopElements() {
-        try {
-            InputStream is = getClass().getResourceAsStream("/assets/settings.png");
-            if (is == null) {
-                throw new RuntimeException("Resource not found: /assets/settings.png");
-            }
-            
-            BufferedImage fullImage = ImageIO.read(is);
-            
-            settingsImageNormal = fullImage.getSubimage(0, 0, 32, 32);
-            settingsImageHover = fullImage.getSubimage(32, 0, 32, 32);
-
-            is = getClass().getResourceAsStream("/assets/help.png");
-            if (is == null) {
-                throw new RuntimeException("Resource not found: /assets/settings.png");
-            }
-
-            fullImage = ImageIO.read(is);
-
-            helpImageNormal = fullImage.getSubimage(0, 0, 32, 32);
-            helpImageHover = fullImage.getSubimage(32, 0, 32, 32);
-
-            
-        } catch (IOException e) {
-            System.out.println("Error loading settings image: " + e.getMessage());
-        }
-    }
-    
-    private class HelpIcon extends JPanel
-    {
-        private boolean hovered = false;
-
-        public HelpIcon()
-        {
-            setPreferredSize(new Dimension(32,32));
-            setOpaque(false);
-        }
-
-        public void setHovered(boolean hovered)
-        {
-            this.hovered = hovered;
-        } 
-
-        @Override
-        protected void paintComponent(Graphics g)
-        {
-            g.setColor(new Color(0, 0, 0, 0)); 
-            g.fillRect(0, 0, getWidth(), getHeight());
-
-            if (hovered && helpImageHover != null) {
-                g.drawImage(helpImageHover, 0, 0, this);
-            } else if (helpImageNormal != null) {
-                g.drawImage(helpImageNormal, 0, 0, this);
-            }
-        }
-    }
-    private class SettingsIcon extends JPanel 
-    {
-        private boolean hovered = false;
-        
-        public SettingsIcon() {
-            setPreferredSize(new Dimension(32, 32));
-            setOpaque(false); 
-        }
-        
-        public void setHovered(boolean hovered) {
-            this.hovered = hovered;
-        }
-        
-        @Override
-        protected void paintComponent(Graphics g) {
-            g.setColor(new Color(0, 0, 0, 0)); 
-            g.fillRect(0, 0, getWidth(), getHeight());
-            
-            if (hovered && settingsImageHover != null) {
-                g.drawImage(settingsImageHover, 0, 0, this);
-            } else if (settingsImageNormal != null) {
-                g.drawImage(settingsImageNormal, 0, 0, this);
-            }
-        }
     }
 
     private void showSettingsPanel() {
@@ -336,8 +215,6 @@ public class MainMenu extends JPanel
 
     private void disableBackgroundElements(boolean disable) {
         inputField.setEnabled(!disable);
-        settingsIcon.setEnabled(!disable);
-        helpIcon.setEnabled(!disable);
     }
 
     private void loadCustomFont() {
@@ -353,5 +230,9 @@ public class MainMenu extends JPanel
             e.printStackTrace();
             pixelatedEleganceFont = new Font("SansSerif", Font.PLAIN, 14); // Fallback font
         }
+    }
+
+    public CustomTextField getInputField() {
+        return inputField;
     }
 }

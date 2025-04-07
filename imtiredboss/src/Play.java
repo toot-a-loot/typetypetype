@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -23,19 +24,32 @@ public class Play extends JPanel {
     private JPanel ground;
     private JLayeredPane layerMyPanels;
     private PlayTextField typeHere;
-    private List<JLabel> wordLabels; // List of active word labels
-    private List<String> activeWords; // Track active words
+    // Thread-safe lists for word management
+    private List<JLabel> wordLabels = Collections.synchronizedList(new ArrayList<>());
+    private List<String> activeWords = Collections.synchronizedList(new ArrayList<>());
     private WordThread wordThread;
     private int currentSpriteFrame = 0; // Track current sprite frame
     private final int SPRITE_WIDTH = 62;
     private final int SPRITE_HEIGHT = 62;
+    // Lock objects for synchronization
+    private final Object wordLabelLock = new Object();
+    // Reference to game over container label
+    private MusicPlayer musicPlayer;
+    private JLabel gameOverContainer;
+    private String gameplayMusicPath = "/music/ingame music (k.k slider).wav"; 
 
     public Play() {
-        wordLabels = new ArrayList<>();
-        activeWords = new ArrayList<>(); // Initialize the list of active words
         loadCustomFont();
         setupPlayer();
         setupBackground();
+        initializeMusic();
+    }
+
+    private void initializeMusic() {
+        musicPlayer = new MusicPlayer();
+        
+        musicPlayer.play(gameplayMusicPath, true); 
+        musicPlayer.setVolume(0.65f);
     }
 
     private void setupBackground() {
@@ -46,7 +60,7 @@ public class Play extends JPanel {
         backPanel.setBounds(0, 0, 720, 960);
 
         // Create the PlayTextField and pass the background instance
-        typeHere = new PlayTextField(backPanel); // Use PlayTextField instead of CustomTextField
+        typeHere = new PlayTextField(backPanel);
         typeHere.setOpaque(false);
         typeHere.setForeground(Color.white);
         typeHere.setBackground(new Color(0, 0, 0, 0));
@@ -64,23 +78,37 @@ public class Play extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (wordThread.isStopGeneration()) {
-                    return; // Do nothing if word generation has stopped
+                    String input = typeHere.getText().trim().toUpperCase();
+
+                    if (input.equals("RESTART")) {
+                        restartGame();
+                    } 
+                    else if (input.equals("MAIN MENU")) {
+                        returnToMainMenu();
+                    }
+                    else if (input.equals("EXIT")) {
+                        exitGame();
+                    }
+                    typeHere.setText(""); // Clear the input field
+                    return; // Exit the method to prevent further processing
                 }
 
                 String input = typeHere.getText().trim().toUpperCase();
-                for (int i = 0; i < activeWords.size(); i++) {
-                    if (input.equals(activeWords.get(i))) {
-                        // Match found, remove the word label
-                        JLabel wordLabel = wordLabels.get(i);
-                        removeWordLabel(wordLabel); // Remove the word label from the container
-                        typeHere.setText(""); // Clear the input field
-                        WordThread.decrementWordCount(); // Decrement the word count
-                        break;
+                
+                synchronized (wordLabelLock) {
+                    for (int i = 0; i < activeWords.size(); i++) {
+                        if (input.equals(activeWords.get(i))) {
+                            // Match found, remove the word label
+                            JLabel wordLabel = wordLabels.get(i);
+                            removeWordLabel(wordLabel); // Remove the word label from the container
+                            typeHere.setText(""); // Clear the input field
+                            WordThread.decrementWordCount(); // Decrement the word count
+                            break;
+                        }
                     }
                 }
             }
         });
-        
 
         // Apply document filter to limit input to 20 characters and enforce uppercase
         ((AbstractDocument) typeHere.getDocument()).setDocumentFilter(new DocumentFilter() {
@@ -124,7 +152,7 @@ public class Play extends JPanel {
                     // Ensure we don't go out of bounds
                     srcX = Math.min(srcX, player.getWidth() - SPRITE_WIDTH);
                     g.drawImage(player.getSubimage(srcX, 0, SPRITE_WIDTH, SPRITE_HEIGHT), 
-                                327, 800, null);
+                               327, 800, null);
                 }
             }
         };
@@ -160,6 +188,13 @@ public class Play extends JPanel {
         });
     }
 
+    // Method to stop music
+    public void stopMusic() {
+        if (musicPlayer != null) {
+            musicPlayer.stop();
+        }
+    }
+
     private void setupPlayer() {
         InputStream is = getClass().getResourceAsStream("/assets/main character.png");
         try {
@@ -170,24 +205,32 @@ public class Play extends JPanel {
     }
 
     public void addWordLabel(JLabel wordLabel) {
-        wordLabels.add(wordLabel);
-        activeWords.add(wordLabel.getText()); // Add the word to the active words list
-        layerMyPanels.add(wordLabel, JLayeredPane.MODAL_LAYER);
-        layerMyPanels.revalidate();
-        layerMyPanels.repaint();
+        synchronized (wordLabelLock) {
+            wordLabels.add(wordLabel);
+            activeWords.add(wordLabel.getText());
+            layerMyPanels.add(wordLabel, JLayeredPane.MODAL_LAYER);
+            layerMyPanels.revalidate();
+            layerMyPanels.repaint();
+        }
     }
 
     public void removeWordLabel(JLabel wordLabel) {
-        wordLabels.remove(wordLabel);
-        activeWords.remove(wordLabel.getText()); // Remove the word from the active words list
-        layerMyPanels.remove(wordLabel); // Remove the word label from the container
-        layerMyPanels.revalidate();
-        layerMyPanels.repaint();
-        WordThread.decrementWordCount(); // Decrement the word count
+        synchronized (wordLabelLock) {
+            int index = wordLabels.indexOf(wordLabel);
+            if (index != -1) {
+                activeWords.remove(index);
+                wordLabels.remove(index);
+                layerMyPanels.remove(wordLabel);
+                layerMyPanels.revalidate();
+                layerMyPanels.repaint();
+            }
+        }
     }
 
     public boolean containsWordLabel(JLabel wordLabel) {
-        return wordLabels.contains(wordLabel); // Check if the word label is still in the container
+        synchronized (wordLabelLock) {
+            return wordLabels.contains(wordLabel);
+        }
     }
 
     private void loadCustomFont() {
@@ -198,10 +241,10 @@ public class Play extends JPanel {
             }
 
             Font customFont = Font.createFont(Font.TRUETYPE_FONT, is);
-            pixelatedEleganceFont = customFont.deriveFont(Font.PLAIN, 14); // Adjust size and style
+            pixelatedEleganceFont = customFont.deriveFont(Font.PLAIN, 14);
         } catch (Exception e) {
             e.printStackTrace();
-            pixelatedEleganceFont = new Font("SansSerif", Font.PLAIN, 14); // Fallback font
+            pixelatedEleganceFont = new Font("SansSerif", Font.PLAIN, 14);
         }
     }
 
@@ -213,18 +256,16 @@ public class Play extends JPanel {
         return typeHere;
     }
 
-    public void showGameOverMessage() 
-    {
-        JLabel gameOverContainer = new JLabel();
+    public void showGameOverMessage() {
+        gameOverContainer = new JLabel();
         gameOverContainer.setLayout(null);
-        gameOverContainer.setBounds(120,200,500,600);
+        gameOverContainer.setBounds(120, 200, 500, 600);
 
         JLabel gameOverLabel = new JLabel("Game Over :(");
         gameOverLabel.setFont(pixelatedEleganceFont.deriveFont(Font.BOLD, 48));
         gameOverLabel.setForeground(Color.RED);
         gameOverLabel.setBounds(0, 0, 500, 100);
         gameOverLabel.setHorizontalAlignment(SwingConstants.CENTER);
-
         
         JLabel restartQuestionMark = new JLabel("<html><div style='text-align: center; width : 373px;'>Type<br><br>RESTART<br>MAIN MENU<br>or<br>EXIT</div></html>");
         restartQuestionMark.setFont(pixelatedEleganceFont.deriveFont(Font.BOLD, 24));
@@ -238,5 +279,66 @@ public class Play extends JPanel {
         layerMyPanels.add(gameOverContainer, JLayeredPane.MODAL_LAYER);
         layerMyPanels.revalidate();
         layerMyPanels.repaint();
+        
+        // Ensure text field is focused so player can type commands
+        typeHere.requestFocusInWindow();
+    }
+    
+    // New method to restart the game
+    public void restartGame() {
+        // Remove game over message
+        if (gameOverContainer != null) {
+            layerMyPanels.remove(gameOverContainer);
+            gameOverContainer = null;
+        }
+        
+        // Clear all existing words
+        synchronized (wordLabelLock) {
+            for (JLabel label : wordLabels) {
+                layerMyPanels.remove(label);
+            }
+            wordLabels.clear();
+            activeWords.clear();
+        }
+        
+        // Reset the UI
+        layerMyPanels.revalidate();
+        layerMyPanels.repaint();
+        
+        // Restart the word thread
+        if (wordThread != null) {
+            wordThread.restart();
+        }
+        
+        // Focus on text field
+        typeHere.requestFocusInWindow();
+    }
+    
+    // Method to handle returning to main menu
+    public void returnToMainMenu() 
+    {
+        stopMusic();
+        java.awt.Window window = SwingUtilities.getWindowAncestor(Play.this);
+        if (window != null) 
+        {
+            MainMenu mainMenu = new MainMenu();
+            
+            
+            ((JFrame) window).getContentPane().removeAll();
+            window.add(mainMenu);
+            window.revalidate();
+            window.repaint();
+            
+            SwingUtilities.invokeLater(() -> {
+                mainMenu.getInputField().requestFocusInWindow();
+            });
+        }
+        
+    }
+    
+    public void exitGame() {
+        // Close the application
+        System.out.println("Exit requested");
+        System.exit(0);
     }
 }
