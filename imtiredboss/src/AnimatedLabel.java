@@ -37,13 +37,4 @@ public class AnimatedLabel extends JPanel {
             x += fm.charWidth(text.charAt(i)) + 5;
         }
     }
-
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Animated JLabel");
-        AnimatedLabel label = new AnimatedLabel("Hello!");
-        frame.add(label);
-        frame.setSize(300, 150);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
-    }
 }

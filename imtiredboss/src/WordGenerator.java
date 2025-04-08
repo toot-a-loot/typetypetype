@@ -20,7 +20,6 @@ public class WordGenerator {
             String line;
             while ((line = br.readLine()) != null) {
                 String word = line.trim().toUpperCase();
-                // Check if the word contains only alphabetic characters
                 if (word.matches("[A-Z]+")) {
                     words.add(word);
                 }

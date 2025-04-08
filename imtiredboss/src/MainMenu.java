@@ -146,7 +146,7 @@ public class MainMenu extends JPanel
         inputField.addActionListener((ActionEvent e) -> {
             String input = inputField.getText().trim().toLowerCase();
             if (input.equals("start")) {
-                stopMusic(); // Stop music before transitioning
+                stopMusic();
                 
                 java.awt.Window window = SwingUtilities.getWindowAncestor(MainMenu.this);
                 if (window != null) 
@@ -183,10 +183,7 @@ public class MainMenu extends JPanel
         start.add(inputField, gbc);
         start.add(toBeginText, gbc);
     }
-    
-    // Rest of the MainMenu class code...
-    // (unchanged methods omitted for brevity)
-    
+
     private void setupHelpAndSettingsPanel() {
         helpPanel = new RoundedPanel(30);
         helpPanel.setBounds(85, 180, 550, 600);

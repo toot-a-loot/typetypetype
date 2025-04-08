@@ -5,10 +5,10 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 
 public class StackedSineWaveBackground extends JPanel {
-    private int WIDTH; // Width of the panel
-    private int HEIGHT; // Height of the panel
-    private static final int NUM_WAVES = 5; // Number of stacked sine waves
-    private static final int SPEED = 100; // Speed of the animation (pixels per frame)
+    private int WIDTH;
+    private int HEIGHT;
+    private static final int NUM_WAVES = 5;
+    private static final int SPEED = 120;
     private int WAVE_HEIGHT;
     private static final int STROKE_SIZE = 100; 
     private static final int PIXEL_SIZE = 4;

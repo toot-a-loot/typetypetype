@@ -32,7 +32,6 @@ public class CustomTextField extends JTextField {
             }
         });
 
-        // Initialize animation timer
         animationTimer = new Timer(50, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -40,7 +39,7 @@ public class CustomTextField extends JTextField {
                     yOffsets = new int[placeholder.length()];
                 }
                 for (int i = 0; i < yOffsets.length; i++) {
-                    yOffsets[i] = (int) (5 * Math.sin((frame + i) * 0.3)); // Wave effect
+                    yOffsets[i] = (int) (5 * Math.sin((frame + i) * 0.3));
                 }
                 frame++;
                 repaint();
@@ -48,14 +47,13 @@ public class CustomTextField extends JTextField {
         });
         animationTimer.start();
 
-        // Use a custom caret that does not paint anything (fully transparent)
+
         DefaultCaret caret = new DefaultCaret() {
             @Override
             public void paint(Graphics g) {
-                // Do not paint anything, making the caret fully transparent
             }
         };
-        caret.setBlinkRate(0); // Disable blinking
+        caret.setBlinkRate(0);
         setCaret(caret);
     }
 
@@ -73,7 +71,6 @@ public class CustomTextField extends JTextField {
             int x = (getWidth() - metrics.stringWidth(placeholder)) / 2;
             int baseY = (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
 
-            // Draw each letter with animation
             for (int i = 0; i < placeholder.length(); i++) {
                 g2d.drawString(String.valueOf(placeholder.charAt(i)), x, baseY + yOffsets[i]);
                 x += metrics.charWidth(placeholder.charAt(i));

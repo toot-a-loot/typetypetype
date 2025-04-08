@@ -22,16 +22,13 @@ public class Play extends JPanel {
     private JPanel ground;
     private JLayeredPane layerMyPanels;
     private PlayTextField typeHere;
-    // Thread-safe lists for word management
     private List<JLabel> wordLabels = Collections.synchronizedList(new ArrayList<>());
     private List<String> activeWords = Collections.synchronizedList(new ArrayList<>());
     private WordThread wordThread;
     private int currentSpriteFrame = 0; // Track current sprite frame
     private final int SPRITE_WIDTH = 62;
     private final int SPRITE_HEIGHT = 62;
-    // Lock objects for synchronization
     private final Object wordLabelLock = new Object();
-    // Reference to game over container label
     private MusicPlayer musicPlayer;
     private JLabel gameOverContainer;
     private String gameplayMusicPath = "/music/ingame music (k.k slider).wav"; 
@@ -57,7 +54,6 @@ public class Play extends JPanel {
         backPanel = new StackedSineWaveBackground(720, 960);
         backPanel.setBounds(0, 0, 720, 960);
 
-        // Create the PlayTextField and pass the background instance
         typeHere = new PlayTextField(backPanel);
         typeHere.setOpaque(false);
         typeHere.setForeground(Color.white);
@@ -68,10 +64,8 @@ public class Play extends JPanel {
         typeHere.setBounds(158, 740, 400, 50);
         typeHere.setHorizontalAlignment(JTextField.CENTER);
 
-        // Set focus on the PlayTextField when the program launches
         typeHere.requestFocusInWindow();
 
-        // Add an ActionListener to handle the Enter key press
         typeHere.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -87,8 +81,8 @@ public class Play extends JPanel {
                     else if (input.equals("EXIT")) {
                         exitGame();
                     }
-                    typeHere.setText(""); // Clear the input field
-                    return; // Exit the method to prevent further processing
+                    typeHere.setText("");
+                    return;
                 }
 
                 String input = typeHere.getText().trim().toUpperCase();
@@ -96,11 +90,10 @@ public class Play extends JPanel {
                 synchronized (wordLabelLock) {
                     for (int i = 0; i < activeWords.size(); i++) {
                         if (input.equals(activeWords.get(i))) {
-                            // Match found, remove the word label
                             JLabel wordLabel = wordLabels.get(i);
-                            removeWordLabel(wordLabel); // Remove the word label from the container
-                            typeHere.setText(""); // Clear the input field
-                            WordThread.decrementWordCount(); // Decrement the word count
+                            removeWordLabel(wordLabel);
+                            typeHere.setText("");
+                            WordThread.decrementWordCount();
                             break;
                         }
                     }
@@ -108,15 +101,14 @@ public class Play extends JPanel {
             }
         });
 
-        // Apply document filter to limit input to 20 characters and enforce uppercase
         ((AbstractDocument) typeHere.getDocument()).setDocumentFilter(new DocumentFilter() {
             @Override
             public void replace(FilterBypass fb, int offset, int length, String text, AttributeSet attrs)
                     throws BadLocationException {
                 String currentText = fb.getDocument().getText(0, fb.getDocument().getLength());
                 int newLength = currentText.length() - length + text.length();
-                if (newLength <= 20) { // Limit to 20 characters
-                    super.replace(fb, offset, length, text.toUpperCase(), attrs); // Convert to uppercase
+                if (newLength <= 20) {
+                    super.replace(fb, offset, length, text.toUpperCase(), attrs);
                 }
             }
 
@@ -125,7 +117,7 @@ public class Play extends JPanel {
                     throws BadLocationException {
                 String currentText = fb.getDocument().getText(0, fb.getDocument().getLength());
                 int newLength = currentText.length() + text.length();
-                if (newLength <= 20) { // Limit to 20 characters
+                if (newLength <= 20) {
                     super.insertString(fb, offset, text.toUpperCase(), attrs);
                 }
             }
@@ -165,18 +157,15 @@ public class Play extends JPanel {
         layerMyPanels.add(ground, JLayeredPane.PALETTE_LAYER);
         layerMyPanels.add(playerPanel, JLayeredPane.DRAG_LAYER);
 
-        // Add the text field to the layered pane
         layerMyPanels.add(typeHere, JLayeredPane.MODAL_LAYER);
 
         add(layerMyPanels);
 
         this.setVisible(true);
         typeHere.setOnTypeCallback(() -> {
-            // Randomly select between frame 1 or 2 (skipping frame 0)
             currentSpriteFrame = (int)(Math.random() * 2) + 1;
             playerPanel.repaint();
-            
-            // Reset to default frame after a short delay
+
             Timer timer = new Timer(300, evt -> {
                 currentSpriteFrame = 0;
                 playerPanel.repaint();
@@ -186,7 +175,6 @@ public class Play extends JPanel {
         });
     }
 
-    // Method to stop music
     public void stopMusic() {
         if (musicPlayer != null) {
             musicPlayer.stop();
@@ -287,20 +275,16 @@ public class Play extends JPanel {
         layerMyPanels.add(gameOverContainer, JLayeredPane.MODAL_LAYER);
         layerMyPanels.revalidate();
         layerMyPanels.repaint();
-        
-        // Ensure text field is focused so player can type commands
+
         typeHere.requestFocusInWindow();
     }
-    
-    // New method to restart the game
+
     public void restartGame() {
-        // Remove game over message
         if (gameOverContainer != null) {
             layerMyPanels.remove(gameOverContainer);
             gameOverContainer = null;
         }
-        
-        // Clear all existing words
+
         synchronized (wordLabelLock) {
             for (JLabel label : wordLabels) {
                 layerMyPanels.remove(label);
@@ -308,21 +292,17 @@ public class Play extends JPanel {
             wordLabels.clear();
             activeWords.clear();
         }
-        
-        // Reset the UI
+
         layerMyPanels.revalidate();
         layerMyPanels.repaint();
-        
-        // Restart the word thread
+
         if (wordThread != null) {
             wordThread.restart();
         }
-        
-        // Focus on text field
+
         typeHere.requestFocusInWindow();
     }
-    
-    // Method to handle returning to main menu
+
     public void returnToMainMenu() 
     {
         stopMusic();
@@ -345,8 +325,7 @@ public class Play extends JPanel {
     }
     
     public void exitGame() {
-        // Close the application
-        System.out.println("Exit requested");
+        System.out.println("byebye :(");
         System.exit(0);
     }
 }
